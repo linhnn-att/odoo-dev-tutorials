@@ -15,12 +15,14 @@
         <field name="arch" type="xml">
             <list string="Properties">
                 <field name="name"/>
+                <field name="tag_ids" widget="many2many_tags"/>
                 <field name="postcode"/>
                 <field name="state"/>
                 <field name="expected_price"/>
                 <field name="selling_price"/>
                 <field name="bedrooms"/>
                 <field name="living_area"/>
+                <field name="total_area"/>
             </list>
         </field>
     </record>
@@ -36,6 +38,7 @@
                     <group>
                         <group>
                             <field name="name"/>
+                            <field name="tag_ids" widget="many2many_tags"/>
                             <field name="postcode"/>
                             <field name="state"/>
                             <field name="expected_price"/>
@@ -45,19 +48,58 @@
                         <group>
                             <field name="bedrooms"/>
                             <field name="living_area"/>
+                            <field name="total_area" readonly="1"/>
                             <field name="facades"/>
                             <field name="garage"/>
                             <field name="garden"/>
-                            <field name="garden_area"/>
-                            <field name="garden_orientation"/>
+
+                            <field name="garden_area"
+                                   invisible="garden == False"/>
+                            <field name="garden_orientation"
+                                   invisible="garden == False"/>
+
                             <field name="date_availability"/>
                         </group>
                     </group>
 
                     <notebook>
+
+                        <page string="General Information">
+                            <group>
+                                <field name="property_type_id"/>
+                                <field name="salesperson_id"/>
+                                <field name="buyer_id"/>
+                            </group>
+                        </page>
+
                         <page string="Description">
                             <field name="description"/>
                         </page>
+
+                        <page string="Offers">
+    <field name="offer_ids">
+        <list editable="bottom">
+            <field name="price"/>
+            <field name="partner_id"/>
+            <field name="status"/>
+            <button
+                name="action_accept"
+                type="object"
+                string="Accept"
+                class="btn-primary"
+                attrs="{'invisible': [('status', '!=', False)]}"
+            />
+            <button
+                name="action_refuse"
+                type="object"
+                string="Refuse"
+                attrs="{'invisible': [('status', '!=', False)]}"
+            />
+        </list>
+    </field>
+</page>
+
+
                     </notebook>
 
                 </sheet>
@@ -65,33 +107,29 @@
         </field>
     </record>
 
-   <!-- Search View -->
+    <!-- Search View -->
 <record id="estate_property_view_search" model="ir.ui.view">
     <field name="name">estate.property.search</field>
     <field name="model">estate.property</field>
     <field name="arch" type="xml">
         <search>
 
-            <!-- Quick search -->
-            <filter name="name" string="Name" domain="[]"/>
-            <filter name="postcode" string="Postcode" domain="[]"/>
-            <filter name="state" string="State" domain="[]"/>
+            <!-- Search fields -->
+            <field name="name"/>
+            <field name="postcode"/>
+            <field name="state"/>
 
-            <!-- Available filter -->
+            <!-- Filters -->
             <filter
                 name="available"
                 string="Available"
-                domain="[
-                    '|',
-                    ('state', '=', 'new'),
-                    ('state', '=', 'offer_received')
-                ]"
+                domain="[('state', 'in', ('new', 'offer_received'))]"
             />
 
             <!-- Group By -->
             <filter
+                string="Postcode"
                 name="group_by_postcode"
-                string="Group by Postcode"
                 context="{'group_by': 'postcode'}"
             />
 
