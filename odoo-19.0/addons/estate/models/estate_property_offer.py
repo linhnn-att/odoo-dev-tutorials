@@ -1,4 +1,5 @@
 from odoo import fields, models, api
+from datetime import timedelta
 
 
 class EstatePropertyOffer(models.Model):
@@ -6,12 +7,13 @@ class EstatePropertyOffer(models.Model):
     _description = "Real Estate Property Offer"
     _order = "price desc"
 
+    # ===== Basic fields =====
     price = fields.Float(required=True)
 
     status = fields.Selection(
         [
-            ('accepted', 'Accepted'),
-            ('refused', 'Refused'),
+            ("accepted", "Accepted"),
+            ("refused", "Refused"),
         ],
         copy=False
     )
@@ -25,29 +27,70 @@ class EstatePropertyOffer(models.Model):
     property_id = fields.Many2one(
         "estate.property",
         string="Property",
-        required=True
+        required=True,
+        ondelete="cascade"
     )
 
+    # ===== Chapter 8 =====
+    validity = fields.Integer(
+        string="Validity (days)",
+        default=7
+    )
+
+    date_deadline = fields.Date(
+        string="Deadline",
+        compute="_compute_date_deadline",
+        inverse="_inverse_date_deadline",
+        store=True
+    )
+
+    # ===== Compute =====
+    @api.depends("create_date", "validity")
+    def _compute_date_deadline(self):
+        for record in self:
+            if record.create_date:
+                record.date_deadline = (
+                    record.create_date.date()
+                    + timedelta(days=record.validity)
+                )
+            else:
+                record.date_deadline = fields.Date.today() + timedelta(
+                    days=record.validity
+                )
+
+    # ===== Inverse =====
+    def _inverse_date_deadline(self):
+        for record in self:
+            if record.create_date and record.date_deadline:
+                record.validity = (
+                    record.date_deadline
+                    - record.create_date.date()
+                ).days
+
+    # ===== ORM Override =====
     @api.model
     def create(self, vals):
         offer = super().create(vals)
-        if offer.property_id.state == 'new':
-            offer.property_id.state = 'offer_received'
+        if offer.property_id.state == "new":
+            offer.property_id.state = "offer_received"
         return offer
 
+    # ===== Business Actions =====
     def action_accept(self):
         for offer in self:
-            offer.status = 'accepted'
+            offer.status = "accepted"
 
+            # từ chối các offer khác
             other_offers = offer.property_id.offer_ids - offer
-            other_offers.write({'status': 'refused'})
+            other_offers.write({"status": "refused"})
 
+            # cập nhật property
             offer.property_id.write({
-                'state': 'offer_accepted',
-                'selling_price': offer.price,
-                'buyer_id': offer.partner_id.id,
+                "state": "offer_accepted",
+                "selling_price": offer.price,
+                "buyer_id": offer.partner_id.id,
             })
 
     def action_refuse(self):
         for offer in self:
-            offer.status = 'refused'
+            offer.status = "refused"
