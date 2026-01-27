@@ -14,16 +14,16 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <list string="Properties">
-                <field name="name"/>
-                <field name="tag_ids" widget="many2many_tags"/>
-                <field name="postcode"/>
-                <field name="state"/>
-                <field name="expected_price"/>
-                <field name="best_price" readonly="1"/>
-                <field name="selling_price"/>
-                <field name="bedrooms"/>
-                <field name="living_area"/>
-                <field name="total_area"/>
+                <field name="name" />
+                <field name="tag_ids" widget="many2many_tags" />
+                <field name="postcode" />
+                <field name="state" />
+                <field name="expected_price" />
+                <field name="best_price" readonly="1" />
+                <field name="selling_price" />
+                <field name="bedrooms" />
+                <field name="living_area" />
+                <field name="total_area" />
             </list>
         </field>
     </record>
@@ -34,31 +34,53 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Property">
+                <header>
+                    <button
+                        name="action_sold"
+                        type="object"
+                        string="Sold"
+                        invisible="state != 'offer_accepted'"
+                    />
+
+                    <button
+                        name="action_cancel"
+                        type="object"
+                        string="Cancel"
+                        invisible="state not in ('new', 'offer_received')"
+                    />
+
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="new,offer_received,offer_accepted,sold,cancelled"
+                    />
+                </header>
+
                 <sheet>
 
                     <group>
                         <group>
-                            <field name="name"/>
-                            <field name="tag_ids" widget="many2many_tags"/>
-                            <field name="postcode"/>
-                            <field name="state"/>
-                            <field name="expected_price"/>
-                            <field name="best_price" readonly="1"/>
-                            <field name="selling_price"/>
+                            <field name="name" />
+                            <field name="tag_ids" widget="many2many_tags" />
+                            <field name="postcode" />
+                            <field name="state" />
+                            <field name="expected_price" />
+                            <field name="best_price" readonly="1" />
+                            <field name="selling_price" />
                         </group>
 
                         <group>
-                            <field name="bedrooms"/>
-                            <field name="living_area"/>
-                            <field name="total_area" readonly="1"/>
-                            <field name="facades"/>
-                            <field name="garage"/>
-                            <field name="garden"/>
+                            <field name="bedrooms" />
+                            <field name="living_area" />
+                            <field name="total_area" readonly="1" />
+                            <field name="facades" />
+                            <field name="garage" />
+                            <field name="garden" />
 
-                            <field name="garden_area" invisible="garden == False"/>
-                            <field name="garden_orientation" invisible="garden == False"/>
+                            <field name="garden_area" invisible="garden == False" />
+                            <field name="garden_orientation" invisible="garden == False" />
 
-                            <field name="date_availability"/>
+                            <field name="date_availability" />
                         </group>
                     </group>
 
@@ -66,14 +88,14 @@
 
                         <page string="General Information">
                             <group>
-                                <field name="property_type_id"/>
-                                <field name="salesperson_id"/>
-                                <field name="buyer_id"/>
+                                <field name="property_type_id" />
+                                <field name="salesperson_id" />
+                                <field name="buyer_id" />
                             </group>
                         </page>
 
                         <page string="Description">
-                            <field name="description"/>
+                            <field name="description" />
                         </page>
 
                         <!-- OFFERS -->
@@ -82,35 +104,35 @@
 
                                 <!-- INLINE ADD LINE -->
                                 <list editable="bottom">
-                                    <field name="price"/>
-                                    <field name="partner_id"/>
-                                    <field name="validity"/>
-                                    <field name="date_deadline"/>
-                                    <field name="status"/>
+                                    <field name="price" />
+                                    <field name="partner_id" />
+                                    <field name="validity" />
+                                    <field name="date_deadline" />
+                                    <field name="status" />
 
                                     <button
                                         name="action_accept"
                                         type="object"
                                         string="Accept"
                                         class="btn-primary"
-                                        attrs="{'invisible': [('status', '!=', False)]}"
+                                        invisible="status != False"
                                     />
                                     <button
                                         name="action_refuse"
                                         type="object"
                                         string="Refuse"
-                                        attrs="{'invisible': [('status', '!=', False)]}"
+                                        invisible="status != False"
                                     />
                                 </list>
 
                                 <!-- OPEN LINE FORM -->
                                 <form>
                                     <group>
-                                        <field name="price"/>
-                                        <field name="partner_id"/>
-                                        <field name="validity"/>
-                                        <field name="date_deadline"/>
-                                        <field name="status" readonly="1"/>
+                                        <field name="price" />
+                                        <field name="partner_id" />
+                                        <field name="validity" />
+                                        <field name="date_deadline" />
+                                        <field name="status" readonly="1" />
                                     </group>
                                 </form>
 
@@ -130,9 +152,9 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name"/>
-                <field name="postcode"/>
-                <field name="state"/>
+                <field name="name" />
+                <field name="postcode" />
+                <field name="state" />
 
                 <filter
                     name="available"

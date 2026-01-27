@@ -1,5 +1,6 @@
 from odoo import fields, models, api
 from datetime import timedelta
+from odoo.exceptions import UserError
 
 
 class EstatePropertyOffer(models.Model):
@@ -75,9 +76,12 @@ class EstatePropertyOffer(models.Model):
             offer.property_id.state = "offer_received"
         return offer
 
-    # ===== Business Actions =====
+    # ===== Business Actions (Chapter 9) =====
     def action_accept(self):
         for offer in self:
+            if offer.status:
+                raise UserError("This offer has already been processed.")
+
             offer.status = "accepted"
 
             # từ chối các offer khác
@@ -93,4 +97,17 @@ class EstatePropertyOffer(models.Model):
 
     def action_refuse(self):
         for offer in self:
+            if offer.status:    
+                raise UserError("This offer has already been processed.")
             offer.status = "refused"
+    def action_sold(self):
+        for record in self:
+            if record.state == "canceled":
+                raise UserError("Canceled property cannot be sold.")
+        record.state = "sold"
+
+    def action_cancel(self):
+        for record in self:
+            if record.state == "sold":
+                raise UserError("Sold property cannot be canceled.")
+        record.state = "canceled"
